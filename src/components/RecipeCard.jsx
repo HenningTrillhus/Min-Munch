@@ -1,11 +1,8 @@
-import { useState } from 'react'
 import StarRating from './StarRating'
 
-export default function RecipeCard({ recipe, onDelete }) {
-  const [expanded, setExpanded] = useState(false)
-
+export default function RecipeCard({ recipe, onOpen, onDelete }) {
   return (
-    <article className={`recipe-card ${expanded ? 'expanded' : ''}`}>
+    <article className="recipe-card" onClick={() => onOpen(recipe)}>
       {recipe.image_url ? (
         <img className="recipe-card-image" src={recipe.image_url} alt={recipe.title} />
       ) : (
@@ -28,29 +25,18 @@ export default function RecipeCard({ recipe, onDelete }) {
           {recipe.price != null && <span>💰 {recipe.price} kr</span>}
         </div>
 
-        {expanded && (
-          <div className="recipe-card-details">
-            {recipe.ingredients?.length > 0 && (
-              <>
-                <h4>Ingredienser</h4>
-                <ul>
-                  {recipe.ingredients.map((ing, i) => (
-                    <li key={i}>{ing}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            <h4>Fremgangsmåte</h4>
-            <p className="instructions">{recipe.instructions}</p>
-          </div>
-        )}
-
         <div className="recipe-card-actions">
-          <button type="button" onClick={() => setExpanded((v) => !v)}>
-            {expanded ? 'Skjul' : 'Vis oppskrift'}
+          <button type="button" onClick={() => onOpen(recipe)}>
+            Vis oppskrift
           </button>
-          <button type="button" className="danger" onClick={() => onDelete(recipe.id)}>
+          <button
+            type="button"
+            className="danger"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(recipe.id)
+            }}
+          >
             Slett
           </button>
         </div>

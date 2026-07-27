@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient'
 import RecipeForm from './components/RecipeForm'
 import RecipeList from './components/RecipeList'
+import RecipeDetail from './components/RecipeDetail'
 import Filters from './components/Filters'
 import Modal from './components/Modal'
 import './App.css'
@@ -11,9 +12,11 @@ const PAGE_SIZE = 9
 function App() {
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(true)
-  const [adding, setAdding] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
-  const [showForm, setShowForm] = useState(false)
+
+  const [formRecipe, setFormRecipe] = useState(null)
+  const [viewingRecipe, setViewingRecipe] = useState(null)
 
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
@@ -48,12 +51,31 @@ function App() {
     setLoading(false)
   }
 
-  async function handleAdd(recipe) {
-    setAdding(true)
+  async function handleSave(payload) {
+    setSaving(true)
     setError(null)
-    const { data, error } = await supabase.from('recipes').insert(recipe).select().single()
 
-    setAdding(false)
+    if (formRecipe?.id) {
+      const { data, error } = await supabase
+        .from('recipes')
+        .update(payload)
+        .eq('id', formRecipe.id)
+        .select()
+        .single()
+
+      setSaving(false)
+      if (error) {
+        setError(error.message)
+        return false
+      }
+      setRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
+      setViewingRecipe((prev) => (prev?.id === data.id ? data : prev))
+      return true
+    }
+
+    const { data, error } = await supabase.from('recipes').insert(payload).select().single()
+
+    setSaving(false)
     if (error) {
       setError(error.message)
       return false
@@ -65,6 +87,7 @@ function App() {
   async function handleDelete(id) {
     const previous = recipes
     setRecipes((prev) => prev.filter((r) => r.id !== id))
+    setViewingRecipe((prev) => (prev?.id === id ? null : prev))
 
     const { error } = await supabase.from('recipes').delete().eq('id', id)
     if (error) {
@@ -105,7 +128,7 @@ function App() {
         <div className="hero-content">
           <h1>Min Munch</h1>
           <p>Din digitale oppskriftsbok — samle, søk og lag dine favorittretter.</p>
-          <button type="button" className="hero-cta" onClick={() => setShowForm(true)}>
+          <button type="button" className="hero-cta" onClick={() => setFormRecipe({})}>
             + Ny oppskrift
           </button>
         </div>
@@ -139,7 +162,11 @@ function App() {
               <p>Laster oppskrifter...</p>
             ) : (
               <>
-                <RecipeList recipes={visibleRecipes} onDelete={handleDelete} />
+                <RecipeList
+                  recipes={visibleRecipes}
+                  onOpen={setViewingRecipe}
+                  onDelete={handleDelete}
+                />
                 {hasMore && (
                   <div className="show-more">
                     <button type="button" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
@@ -153,10 +180,27 @@ function App() {
         </main>
       </div>
 
-      {showForm && (
-        <Modal onClose={() => setShowForm(false)}>
-          <RecipeForm onAdd={handleAdd} adding={adding} onSuccess={() => setShowForm(false)} />
+      {formRecipe && (
+        <Modal onClose={() => setFormRecipe(null)}>
+          <RecipeForm
+            recipe={formRecipe}
+            onSave={handleSave}
+            saving={saving}
+            onSuccess={() => setFormRecipe(null)}
+          />
         </Modal>
+      )}
+
+      {viewingRecipe && (
+        <RecipeDetail
+          recipe={viewingRecipe}
+          onClose={() => setViewingRecipe(null)}
+          onEdit={(recipe) => {
+            setViewingRecipe(null)
+            setFormRecipe(recipe)
+          }}
+          onDelete={handleDelete}
+        />
       )}
     </div>
   )

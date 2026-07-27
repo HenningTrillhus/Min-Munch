@@ -13,8 +13,24 @@ const emptyForm = {
   image_url: '',
 }
 
-export default function RecipeForm({ onAdd, adding, onSuccess }) {
-  const [form, setForm] = useState(emptyForm)
+function toFormState(recipe) {
+  if (!recipe) return emptyForm
+  return {
+    title: recipe.title ?? '',
+    category: recipe.category ?? '',
+    prep_time_minutes: recipe.prep_time_minutes ?? '',
+    servings: recipe.servings ?? '',
+    price: recipe.price ?? '',
+    difficulty: recipe.difficulty ?? 0,
+    ingredients: (recipe.ingredients ?? []).join('\n'),
+    instructions: recipe.instructions ?? '',
+    image_url: recipe.image_url ?? '',
+  }
+}
+
+export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
+  const [form, setForm] = useState(() => toFormState(recipe))
+  const isEditing = Boolean(recipe?.id)
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -25,7 +41,7 @@ export default function RecipeForm({ onAdd, adding, onSuccess }) {
     e.preventDefault()
     if (!form.title.trim() || !form.instructions.trim()) return
 
-    const ok = await onAdd({
+    const ok = await onSave({
       title: form.title.trim(),
       category: form.category.trim() || null,
       prep_time_minutes: form.prep_time_minutes ? Number(form.prep_time_minutes) : null,
@@ -48,7 +64,7 @@ export default function RecipeForm({ onAdd, adding, onSuccess }) {
 
   return (
     <form className="recipe-form" onSubmit={handleSubmit}>
-      <h2>Ny oppskrift</h2>
+      <h2>{isEditing ? 'Rediger oppskrift' : 'Ny oppskrift'}</h2>
 
       <label>
         Tittel *
@@ -128,18 +144,19 @@ export default function RecipeForm({ onAdd, adding, onSuccess }) {
       </label>
 
       <label>
-        Fremgangsmåte *
+        Fremgangsmåte — ett steg per linje *
         <textarea
           name="instructions"
           value={form.instructions}
           onChange={handleChange}
           rows={6}
+          placeholder={'Bland melk og egg\nVisp godt sammen\nStek på middels varme\n...'}
           required
         />
       </label>
 
-      <button type="submit" disabled={adding}>
-        {adding ? 'Lagrer...' : 'Lagre oppskrift'}
+      <button type="submit" disabled={saving}>
+        {saving ? 'Lagrer...' : isEditing ? 'Lagre endringer' : 'Lagre oppskrift'}
       </button>
     </form>
   )

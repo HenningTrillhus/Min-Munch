@@ -1,6 +1,6 @@
 import RecipeCard from './RecipeCard'
 
-export default function RecipeList({ recipes, onDelete }) {
+export default function RecipeList({ recipes, onOpen, onDelete }) {
   if (recipes.length === 0) {
     return <p className="empty-state">Ingen oppskrifter ennå. Legg til den første over!</p>
   }
@@ -8,7 +8,7 @@ export default function RecipeList({ recipes, onDelete }) {
   return (
     <div className="recipe-grid">
       {recipes.map((recipe) => (
-        <RecipeCard key={recipe.id} recipe={recipe} onDelete={onDelete} />
+        <RecipeCard key={recipe.id} recipe={recipe} onOpen={onOpen} onDelete={onDelete} />
       ))}
     </div>
   )
