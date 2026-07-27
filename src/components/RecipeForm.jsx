@@ -1,16 +1,19 @@
 import { useState } from 'react'
+import StarRating from './StarRating'
 
 const emptyForm = {
   title: '',
   category: '',
   prep_time_minutes: '',
   servings: '',
+  price: '',
+  difficulty: 0,
   ingredients: '',
   instructions: '',
   image_url: '',
 }
 
-export default function RecipeForm({ onAdd, adding }) {
+export default function RecipeForm({ onAdd, adding, onSuccess }) {
   const [form, setForm] = useState(emptyForm)
 
   function handleChange(e) {
@@ -22,11 +25,13 @@ export default function RecipeForm({ onAdd, adding }) {
     e.preventDefault()
     if (!form.title.trim() || !form.instructions.trim()) return
 
-    await onAdd({
+    const ok = await onAdd({
       title: form.title.trim(),
       category: form.category.trim() || null,
       prep_time_minutes: form.prep_time_minutes ? Number(form.prep_time_minutes) : null,
       servings: form.servings ? Number(form.servings) : null,
+      price: form.price ? Number(form.price) : null,
+      difficulty: form.difficulty || null,
       ingredients: form.ingredients
         .split('\n')
         .map((line) => line.trim())
@@ -35,7 +40,10 @@ export default function RecipeForm({ onAdd, adding }) {
       image_url: form.image_url.trim() || null,
     })
 
-    setForm(emptyForm)
+    if (ok) {
+      setForm(emptyForm)
+      onSuccess?.()
+    }
   }
 
   return (
@@ -81,10 +89,32 @@ export default function RecipeForm({ onAdd, adding }) {
         </label>
       </div>
 
-      <label>
-        Bilde-URL
-        <input name="image_url" value={form.image_url} onChange={handleChange} />
-      </label>
+      <div className="form-row">
+        <label>
+          Pris (kr)
+          <input
+            name="price"
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.price}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          Vanskelighetsgrad
+          <StarRating
+            value={form.difficulty}
+            onChange={(difficulty) => setForm((prev) => ({ ...prev, difficulty }))}
+          />
+        </label>
+
+        <label>
+          Bilde-URL
+          <input name="image_url" value={form.image_url} onChange={handleChange} />
+        </label>
+      </div>
 
       <label>
         Ingredienser (én per linje)

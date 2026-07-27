@@ -6,6 +6,8 @@ create table if not exists recipes (
   category text,
   prep_time_minutes int,
   servings int,
+  price numeric,
+  difficulty smallint check (difficulty between 1 and 5),
   ingredients text[] not null default '{}',
   instructions text not null default '',
   image_url text,

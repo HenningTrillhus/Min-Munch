@@ -1,15 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient'
 import RecipeForm from './components/RecipeForm'
 import RecipeList from './components/RecipeList'
+import Filters from './components/Filters'
+import Modal from './components/Modal'
 import './App.css'
+
+const PAGE_SIZE = 9
 
 function App() {
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState(null)
+  const [showForm, setShowForm] = useState(false)
+
   const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [maxTime, setMaxTime] = useState('')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useEffect(() => {
     if (isSupabaseConfigured) {
@@ -18,6 +27,10 @@ function App() {
       setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [search, category, maxTime])
 
   async function loadRecipes() {
     setLoading(true)
@@ -40,12 +53,13 @@ function App() {
     setError(null)
     const { data, error } = await supabase.from('recipes').insert(recipe).select().single()
 
+    setAdding(false)
     if (error) {
       setError(error.message)
-    } else {
-      setRecipes((prev) => [data, ...prev])
+      return false
     }
-    setAdding(false)
+    setRecipes((prev) => [data, ...prev])
+    return true
   }
 
   async function handleDelete(id) {
@@ -59,53 +73,91 @@ function App() {
     }
   }
 
-  const filteredRecipes = recipes.filter((r) =>
-    r.title.toLowerCase().includes(search.toLowerCase())
+  const categories = useMemo(
+    () => [...new Set(recipes.map((r) => r.category).filter(Boolean))].sort(),
+    [recipes]
   )
+
+  const filteredRecipes = useMemo(() => {
+    return recipes.filter((r) => {
+      if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false
+      if (category && r.category !== category) return false
+
+      if (maxTime) {
+        if (r.prep_time_minutes == null) return false
+        if (maxTime === '60+') {
+          if (r.prep_time_minutes < 60) return false
+        } else if (r.prep_time_minutes >= Number(maxTime)) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [recipes, search, category, maxTime])
+
+  const visibleRecipes = filteredRecipes.slice(0, visibleCount)
+  const hasMore = visibleCount < filteredRecipes.length
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Min Munch 🍲</h1>
-        <p>Din digitale oppskriftsbok</p>
-      </header>
-
-      {!isSupabaseConfigured && (
-        <div className="error-banner">
-          Supabase er ikke konfigurert ennå.
-          <br />
-          Kopier <code>.env.example</code> til <code>.env</code>, fyll inn dine Supabase-nøkler,
-          kjør <code>supabase/schema.sql</code> i Supabase, og start dev-serveren på nytt.
+      <section className="hero">
+        <div className="hero-content">
+          <h1>Min Munch</h1>
+          <p>Din digitale oppskriftsbok — samle, søk og lag dine favorittretter.</p>
+          <button type="button" className="hero-cta" onClick={() => setShowForm(true)}>
+            + Ny oppskrift
+          </button>
         </div>
-      )}
+      </section>
 
-      {error && (
-        <div className="error-banner">
-          Noe gikk galt: {error}
-        </div>
-      )}
-
-      <main>
-        <RecipeForm onAdd={handleAdd} adding={adding} />
-
-        <section className="recipe-list-section">
-          <div className="list-header">
-            <h2>Oppskrifter</h2>
-            <input
-              type="search"
-              placeholder="Søk etter oppskrift..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <div className="page-content">
+        {!isSupabaseConfigured && (
+          <div className="error-banner">
+            Supabase er ikke konfigurert ennå.
+            <br />
+            Kopier <code>.env.example</code> til <code>.env</code>, fyll inn dine Supabase-nøkler,
+            kjør <code>supabase/schema.sql</code> i Supabase, og start dev-serveren på nytt.
           </div>
+        )}
 
-          {loading ? (
-            <p>Laster oppskrifter...</p>
-          ) : (
-            <RecipeList recipes={filteredRecipes} onDelete={handleDelete} />
-          )}
-        </section>
-      </main>
+        {error && <div className="error-banner">Noe gikk galt: {error}</div>}
+
+        <main>
+          <Filters
+            search={search}
+            onSearchChange={setSearch}
+            category={category}
+            onCategoryChange={setCategory}
+            categories={categories}
+            maxTime={maxTime}
+            onMaxTimeChange={setMaxTime}
+          />
+
+          <section className="recipe-list-section">
+            {loading ? (
+              <p>Laster oppskrifter...</p>
+            ) : (
+              <>
+                <RecipeList recipes={visibleRecipes} onDelete={handleDelete} />
+                {hasMore && (
+                  <div className="show-more">
+                    <button type="button" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                      Vis mer
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        </main>
+      </div>
+
+      {showForm && (
+        <Modal onClose={() => setShowForm(false)}>
+          <RecipeForm onAdd={handleAdd} adding={adding} onSuccess={() => setShowForm(false)} />
+        </Modal>
+      )}
     </div>
   )
 }
