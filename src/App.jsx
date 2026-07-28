@@ -6,6 +6,7 @@ import RecipeDetail from './components/RecipeDetail'
 import Filters from './components/Filters'
 import Modal from './components/Modal'
 import SettingsButton from './components/SettingsButton'
+import { deleteRecipeImage } from './lib/recipeImages'
 import './App.css'
 
 const PAGE_SIZE = 9
@@ -120,6 +121,7 @@ function App() {
     if (!window.confirm('Er du sikker på at du vil slette denne oppskriften?')) return
 
     const previous = recipes
+    const recipeToDelete = previous.find((r) => r.id === id)
     setRecipes((prev) => prev.filter((r) => r.id !== id))
     setViewingRecipe((prev) => (prev?.id === id ? null : prev))
 
@@ -127,6 +129,10 @@ function App() {
     if (error) {
       setError(error.message)
       setRecipes(previous)
+      return
+    }
+    if (recipeToDelete?.image_url) {
+      deleteRecipeImage(recipeToDelete.image_url)
     }
   }
 

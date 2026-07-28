@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import StarRating from './StarRating'
 import { FOOD_TYPES, INGREDIENT_UNITS } from '../constants'
+import { uploadRecipeImage, deleteRecipeImage } from '../lib/recipeImages'
 
 const emptyForm = {
   title: '',
@@ -44,11 +45,48 @@ function toIngredientRows(recipe) {
 export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
   const [form, setForm] = useState(() => toFormState(recipe))
   const [ingredientRows, setIngredientRows] = useState(() => toIngredientRows(recipe))
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imageError, setImageError] = useState(null)
   const isEditing = Boolean(recipe?.id)
+  const originalImageUrl = recipe?.image_url ?? null
 
   function handleChange(e) {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  // The image currently saved on the recipe is only deleted from storage once the
+  // form actually saves — otherwise cancelling would leave the DB pointing at a
+  // file we already removed. Anything uploaded-then-replaced within this editing
+  // session (never saved) is safe to delete right away.
+  async function handleImageSelect(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    setUploadingImage(true)
+    setImageError(null)
+    const previousUrl = form.image_url
+
+    try {
+      const url = await uploadRecipeImage(file)
+      setForm((prev) => ({ ...prev, image_url: url }))
+      if (previousUrl && previousUrl !== originalImageUrl) {
+        deleteRecipeImage(previousUrl)
+      }
+    } catch {
+      setImageError('Kunne ikke laste opp bildet. Prøv igjen.')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  function handleRemoveImage() {
+    const previousUrl = form.image_url
+    setForm((prev) => ({ ...prev, image_url: '' }))
+    if (previousUrl && previousUrl !== originalImageUrl) {
+      deleteRecipeImage(previousUrl)
+    }
   }
 
   function updateIngredientRow(i, field, value) {
@@ -89,6 +127,9 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
     })
 
     if (ok) {
+      if (originalImageUrl && originalImageUrl !== form.image_url) {
+        deleteRecipeImage(originalImageUrl)
+      }
       setForm(emptyForm)
       setIngredientRows([emptyIngredientRow])
       onSuccess?.()
@@ -172,10 +213,31 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
         </label>
       </div>
 
-      <label>
-        Bilde-URL
-        <input name="image_url" value={form.image_url} onChange={handleChange} />
-      </label>
+      <div className="image-field">
+        <span className="ingredient-field-label">Bilde</span>
+
+        {form.image_url ? (
+          <div className="image-preview">
+            <img src={form.image_url} alt="Forhåndsvisning" />
+            <button type="button" onClick={handleRemoveImage} disabled={uploadingImage}>
+              Fjern bilde
+            </button>
+          </div>
+        ) : (
+          <label className="image-upload-button">
+            {uploadingImage ? 'Laster opp...' : '📷 Velg bilde'}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              disabled={uploadingImage}
+              hidden
+            />
+          </label>
+        )}
+
+        {imageError && <span className="image-error">{imageError}</span>}
+      </div>
 
       <div className="ingredient-field">
         <span className="ingredient-field-label">Ingredienser</span>
@@ -240,7 +302,7 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
         />
       </label>
 
-      <button type="submit" disabled={saving}>
+      <button type="submit" disabled={saving || uploadingImage}>
         {saving ? 'Lagrer...' : isEditing ? 'Lagre endringer' : 'Lagre oppskrift'}
       </button>
     </form>

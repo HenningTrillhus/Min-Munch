@@ -26,3 +26,6 @@ create policy "Allow all access to recipes"
   for all
   using (true)
   with check (true);
+
+-- Bildeopplasting (kamerarull osv.) lagres i Supabase Storage, se
+-- supabase/migrations/005_recipe_images_storage.sql for oppsett av bucket + policies.
