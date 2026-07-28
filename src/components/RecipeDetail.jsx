@@ -46,7 +46,10 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
         <div className="detail-body">
           <div className="detail-header">
             <h1>{recipe.title}</h1>
-            {recipe.category && <span className="badge">{recipe.category}</span>}
+            <div className="badge-group">
+              {recipe.type && <span className="badge badge-type">{recipe.type}</span>}
+              {recipe.category && <span className="badge">{recipe.category}</span>}
+            </div>
           </div>
 
           {recipe.difficulty > 0 && <StarRating value={recipe.difficulty} />}

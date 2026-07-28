@@ -19,6 +19,7 @@ function App() {
   const [viewingRecipe, setViewingRecipe] = useState(null)
 
   const [search, setSearch] = useState('')
+  const [type, setType] = useState('')
   const [category, setCategory] = useState('')
   const [maxTime, setMaxTime] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -33,7 +34,7 @@ function App() {
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
-  }, [search, category, maxTime])
+  }, [search, type, category, maxTime])
 
   async function loadRecipes() {
     setLoading(true)
@@ -104,6 +105,7 @@ function App() {
   const filteredRecipes = useMemo(() => {
     return recipes.filter((r) => {
       if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false
+      if (type && r.type !== type) return false
       if (category && r.category !== category) return false
 
       if (maxTime) {
@@ -117,7 +119,7 @@ function App() {
 
       return true
     })
-  }, [recipes, search, category, maxTime])
+  }, [recipes, search, type, category, maxTime])
 
   const visibleRecipes = filteredRecipes.slice(0, visibleCount)
   const hasMore = visibleCount < filteredRecipes.length
@@ -150,6 +152,8 @@ function App() {
           <Filters
             search={search}
             onSearchChange={setSearch}
+            type={type}
+            onTypeChange={setType}
             category={category}
             onCategoryChange={setCategory}
             categories={categories}

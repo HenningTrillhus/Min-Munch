@@ -14,7 +14,10 @@ export default function RecipeCard({ recipe, onOpen, onDelete }) {
       <div className="recipe-card-body">
         <div className="recipe-card-header">
           <h3>{recipe.title}</h3>
-          {recipe.category && <span className="badge">{recipe.category}</span>}
+          <div className="badge-group">
+            {recipe.type && <span className="badge badge-type">{recipe.type}</span>}
+            {recipe.category && <span className="badge">{recipe.category}</span>}
+          </div>
         </div>
 
         {recipe.difficulty > 0 && <StarRating value={recipe.difficulty} size="sm" />}

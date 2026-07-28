@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import StarRating from './StarRating'
+import { FOOD_TYPES } from '../constants'
 
 const emptyForm = {
   title: '',
   category: '',
+  type: '',
   prep_time_minutes: '',
   servings: '',
   price: '',
@@ -18,6 +20,7 @@ function toFormState(recipe) {
   return {
     title: recipe.title ?? '',
     category: recipe.category ?? '',
+    type: recipe.type ?? '',
     prep_time_minutes: recipe.prep_time_minutes ?? '',
     servings: recipe.servings ?? '',
     price: recipe.price ?? '',
@@ -44,6 +47,7 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
     const ok = await onSave({
       title: form.title.trim(),
       category: form.category.trim() || null,
+      type: form.type || null,
       prep_time_minutes: form.prep_time_minutes ? Number(form.prep_time_minutes) : null,
       servings: form.servings ? Number(form.servings) : null,
       price: form.price ? Number(form.price) : null,
@@ -78,8 +82,20 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
             name="category"
             value={form.category}
             onChange={handleChange}
-            placeholder="f.eks. middag, dessert"
+            placeholder="f.eks. varm rett, sunt"
           />
+        </label>
+
+        <label>
+          Type mat
+          <select name="type" value={form.type} onChange={handleChange}>
+            <option value="">Ikke valgt</option>
+            {FOOD_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label>
@@ -92,7 +108,9 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
             onChange={handleChange}
           />
         </label>
+      </div>
 
+      <div className="form-row">
         <label>
           Porsjoner
           <input
@@ -103,9 +121,7 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
             onChange={handleChange}
           />
         </label>
-      </div>
 
-      <div className="form-row">
         <label>
           Pris (kr)
           <input
@@ -125,12 +141,12 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
             onChange={(difficulty) => setForm((prev) => ({ ...prev, difficulty }))}
           />
         </label>
-
-        <label>
-          Bilde-URL
-          <input name="image_url" value={form.image_url} onChange={handleChange} />
-        </label>
       </div>
+
+      <label>
+        Bilde-URL
+        <input name="image_url" value={form.image_url} onChange={handleChange} />
+      </label>
 
       <label>
         Ingredienser (én per linje)

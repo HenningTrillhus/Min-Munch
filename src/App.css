@@ -165,6 +165,7 @@
 }
 
 .recipe-form input,
+.recipe-form select,
 .recipe-form textarea {
   font: inherit;
   font-size: 16px;
@@ -178,6 +179,7 @@
 }
 
 .recipe-form input:focus,
+.recipe-form select:focus,
 .recipe-form textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
@@ -303,6 +305,12 @@
   font-size: 18px;
 }
 
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .badge {
   background: var(--accent-bg);
   color: var(--accent);
@@ -311,6 +319,11 @@
   padding: 3px 10px;
   border-radius: 999px;
   white-space: nowrap;
+}
+
+.badge-type {
+  background: var(--text-h);
+  color: var(--bg);
 }
 
 .recipe-card-meta {

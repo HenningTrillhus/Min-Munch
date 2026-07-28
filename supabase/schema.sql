@@ -4,6 +4,7 @@ create table if not exists recipes (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   category text,
+  type text check (type in ('Frokost', 'Lunsj', 'Middag', 'Dessert', 'Vegetar', 'Fisk', 'Tilbehør', 'Siderett', 'Bakevare')),
   prep_time_minutes int,
   servings int,
   price numeric,

@@ -1,3 +1,5 @@
+import { FOOD_TYPES } from '../constants'
+
 const TIME_OPTIONS = [
   { value: '', label: 'Alle tider' },
   { value: '15', label: 'Under 15 min' },
@@ -9,6 +11,8 @@ const TIME_OPTIONS = [
 export default function Filters({
   search,
   onSearchChange,
+  type,
+  onTypeChange,
   category,
   onCategoryChange,
   categories,
@@ -24,6 +28,15 @@ export default function Filters({
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
       />
+
+      <select value={type} onChange={(e) => onTypeChange(e.target.value)}>
+        <option value="">Alle typer</option>
+        {FOOD_TYPES.map((t) => (
+          <option key={t} value={t}>
+            {t}
+          </option>
+        ))}
+      </select>
 
       <select value={category} onChange={(e) => onCategoryChange(e.target.value)}>
         <option value="">Alle kategorier</option>
