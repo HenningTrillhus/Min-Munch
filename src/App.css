@@ -171,6 +171,10 @@
   justify-content: center;
   padding: 40px 20px;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   z-index: 20;
 }
 
@@ -238,6 +242,10 @@
   align-items: start;
 }
 
+.form-row > * {
+  min-width: 0;
+}
+
 .recipe-form button[type='submit'] {
   align-self: flex-start;
   background: var(--accent);
@@ -287,6 +295,10 @@
   display: grid;
   grid-template-columns: 90px 90px 1fr 44px;
   gap: 8px;
+}
+
+.ingredient-row > * {
+  min-width: 0;
 }
 
 .ingredient-remove {
