@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import StarRating from './StarRating'
-import { FOOD_TYPES } from '../constants'
+import { FOOD_TYPES, INGREDIENT_UNITS } from '../constants'
 
 const emptyForm = {
   title: '',
@@ -10,10 +10,11 @@ const emptyForm = {
   servings: '',
   price: '',
   difficulty: 0,
-  ingredients: '',
   instructions: '',
   image_url: '',
 }
+
+const emptyIngredientRow = { amount: '', unit: 'stk', name: '' }
 
 function toFormState(recipe) {
   if (!recipe) return emptyForm
@@ -25,14 +26,24 @@ function toFormState(recipe) {
     servings: recipe.servings ?? '',
     price: recipe.price ?? '',
     difficulty: recipe.difficulty ?? 0,
-    ingredients: (recipe.ingredients ?? []).join('\n'),
     instructions: recipe.instructions ?? '',
     image_url: recipe.image_url ?? '',
   }
 }
 
+function toIngredientRows(recipe) {
+  const ingredients = recipe?.ingredients
+  if (!ingredients || ingredients.length === 0) return [emptyIngredientRow]
+  return ingredients.map((ing) => ({
+    amount: ing.amount ?? '',
+    unit: ing.unit ?? 'stk',
+    name: ing.name ?? '',
+  }))
+}
+
 export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
   const [form, setForm] = useState(() => toFormState(recipe))
+  const [ingredientRows, setIngredientRows] = useState(() => toIngredientRows(recipe))
   const isEditing = Boolean(recipe?.id)
 
   function handleChange(e) {
@@ -40,9 +51,29 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
+  function updateIngredientRow(i, field, value) {
+    setIngredientRows((prev) => prev.map((row, idx) => (idx === i ? { ...row, [field]: value } : row)))
+  }
+
+  function addIngredientRow() {
+    setIngredientRows((prev) => [...prev, { ...emptyIngredientRow }])
+  }
+
+  function removeIngredientRow(i) {
+    setIngredientRows((prev) => prev.filter((_, idx) => idx !== i))
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.title.trim() || !form.instructions.trim()) return
+
+    const ingredients = ingredientRows
+      .filter((row) => row.name.trim())
+      .map((row) => ({
+        amount: row.amount !== '' ? Number(row.amount) : null,
+        unit: row.amount !== '' ? row.unit : null,
+        name: row.name.trim(),
+      }))
 
     const ok = await onSave({
       title: form.title.trim(),
@@ -52,16 +83,14 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
       servings: form.servings ? Number(form.servings) : null,
       price: form.price ? Number(form.price) : null,
       difficulty: form.difficulty || null,
-      ingredients: form.ingredients
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean),
+      ingredients,
       instructions: form.instructions.trim(),
       image_url: form.image_url.trim() || null,
     })
 
     if (ok) {
       setForm(emptyForm)
+      setIngredientRows([emptyIngredientRow])
       onSuccess?.()
     }
   }
@@ -148,16 +177,56 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
         <input name="image_url" value={form.image_url} onChange={handleChange} />
       </label>
 
-      <label>
-        Ingredienser (én per linje)
-        <textarea
-          name="ingredients"
-          value={form.ingredients}
-          onChange={handleChange}
-          rows={5}
-          placeholder={'2 dl melk\n3 egg\n...'}
-        />
-      </label>
+      <div className="ingredient-field">
+        <span className="ingredient-field-label">Ingredienser</span>
+
+        <div className="ingredient-rows">
+          {ingredientRows.map((row, i) => (
+            <div className="ingredient-row" key={i}>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Mengde"
+                className="ingredient-amount"
+                value={row.amount}
+                onChange={(e) => updateIngredientRow(i, 'amount', e.target.value)}
+              />
+              <select
+                className="ingredient-unit"
+                value={row.unit}
+                onChange={(e) => updateIngredientRow(i, 'unit', e.target.value)}
+              >
+                {INGREDIENT_UNITS.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                placeholder="Ingrediens, f.eks. egg"
+                className="ingredient-name"
+                value={row.name}
+                onChange={(e) => updateIngredientRow(i, 'name', e.target.value)}
+              />
+              <button
+                type="button"
+                className="ingredient-remove"
+                onClick={() => removeIngredientRow(i)}
+                disabled={ingredientRows.length === 1}
+                aria-label="Fjern ingrediens"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button type="button" className="ingredient-add" onClick={addIngredientRow}>
+          + Legg til ingrediens
+        </button>
+      </div>
 
       <label>
         Fremgangsmåte — ett steg per linje *

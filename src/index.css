@@ -1,14 +1,14 @@
 :root {
-  --text: #3d4a56;
-  --text-h: #16232e;
-  --bg: #f2f9fd;
+  --text: #4b5563;
+  --text-h: #1a2430;
+  --bg: #fafbfc;
   --surface: #ffffff;
-  --border: #dbeaf3;
-  --accent: #2ea0e0;
-  --accent-hover: #1d84c2;
-  --accent-bg: rgba(46, 160, 224, 0.1);
+  --border: #e6e9ed;
+  --accent: #2f80c4;
+  --accent-hover: #266aa3;
+  --accent-bg: rgba(47, 128, 196, 0.08);
   --danger: #c0392b;
-  --shadow: rgba(22, 55, 82, 0.08) 0 4px 12px -2px;
+  --shadow: rgba(22, 55, 82, 0.06) 0 2px 10px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
 
@@ -29,9 +29,9 @@
     --bg: #101820;
     --surface: #17222c;
     --border: #253544;
-    --accent: #4db4ec;
-    --accent-hover: #6ec4f1;
-    --accent-bg: rgba(77, 180, 236, 0.15);
+    --accent: #4a9bd6;
+    --accent-hover: #6bacdd;
+    --accent-bg: rgba(74, 155, 214, 0.14);
     --danger: #e0574a;
     --shadow: rgba(0, 0, 0, 0.4) 0 4px 12px -2px;
   }

@@ -5,7 +5,10 @@ export const FOOD_TYPES = [
   'Dessert',
   'Vegetar',
   'Fisk',
+  'Saus',
   'Tilbehør',
   'Siderett',
   'Bakevare',
 ]
+
+export const INGREDIENT_UNITS = ['stk', 'ss', 'ts', 'g', 'kg', 'ml', 'dl', 'l']

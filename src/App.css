@@ -3,10 +3,10 @@
 }
 
 .hero {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  padding: calc(64px + env(safe-area-inset-top)) 20px 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: calc(48px + env(safe-area-inset-top)) 20px 40px;
   text-align: center;
-  color: #fff;
 }
 
 .hero-content {
@@ -15,38 +15,36 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .hero h1 {
-  font-size: 48px;
+  font-size: 40px;
   margin: 0;
-  color: #fff;
+  color: var(--text-h);
   letter-spacing: -1px;
 }
 
 .hero p {
   margin: 0;
-  font-size: 18px;
-  opacity: 0.95;
+  font-size: 17px;
+  color: var(--text);
 }
 
 .hero-cta {
   margin-top: 8px;
-  background: #fff;
-  color: var(--accent-hover);
+  background: var(--accent);
+  color: #fff;
   border: none;
   padding: 12px 28px;
   min-height: 44px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 15px;
-  box-shadow: rgba(0, 0, 0, 0.15) 0 4px 12px;
 }
 
 .hero-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: rgba(0, 0, 0, 0.2) 0 6px 16px;
+  background: var(--accent-hover);
 }
 
 .page-content {
@@ -210,6 +208,72 @@
 .recipe-form button[type='submit']:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Ingredient rows (form) */
+
+.ingredient-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ingredient-field-label {
+  font-size: 14px;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.ingredient-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 90px 90px 1fr 44px;
+  gap: 8px;
+}
+
+.ingredient-row input,
+.ingredient-row select {
+  min-height: 44px;
+}
+
+.ingredient-remove {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  min-height: 44px;
+}
+
+.ingredient-remove:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.ingredient-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ingredient-add {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  min-height: 40px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.ingredient-add:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
 }
 
 /* Star rating */
@@ -489,12 +553,86 @@
   margin: 0 0 10px;
 }
 
-.ingredient-list {
+.ingredient-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ingredient-section-header h2 {
   margin: 0;
-  padding-left: 20px;
+}
+
+.servings-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.servings-stepper button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.servings-stepper button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ingredient-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+}
+
+.ingredient-scale-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ingredient-scale-name {
+  flex: 1;
+}
+
+.ingredient-scale-amounts {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ingredient-scale-original {
+  color: var(--text);
+  opacity: 0.55;
+}
+
+.ingredient-scale-arrow {
+  color: var(--text);
+  opacity: 0.4;
+}
+
+.ingredient-scale-current {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .step-list {
@@ -564,5 +702,9 @@
 
   .detail-header h1 {
     font-size: 24px;
+  }
+
+  .ingredient-row {
+    grid-template-columns: 70px 70px 1fr 40px;
   }
 }

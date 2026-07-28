@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import StarRating from './StarRating'
 
+function formatAmount(n) {
+  const rounded = Math.round(n * 100) / 100
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
+}
+
 export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
   const [checkedSteps, setCheckedSteps] = useState(() => new Set())
+  const baseServings = recipe.servings > 0 ? recipe.servings : null
+  const [servings, setServings] = useState(baseServings ?? 1)
 
   const steps = (recipe.instructions || '')
     .split('\n')
@@ -17,6 +24,8 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
       return next
     })
   }
+
+  const ratio = baseServings ? servings / baseServings : 1
 
   return (
     <div className="detail-overlay">
@@ -56,16 +65,54 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
 
           <div className="recipe-card-meta">
             {recipe.prep_time_minutes != null && <span>⏱ {recipe.prep_time_minutes} min</span>}
-            {recipe.servings != null && <span>🍽 {recipe.servings} porsjoner</span>}
             {recipe.price != null && <span>💰 {recipe.price} kr</span>}
           </div>
 
           {recipe.ingredients?.length > 0 && (
             <section>
-              <h2>Ingredienser</h2>
+              <div className="ingredient-section-header">
+                <h2>Ingredienser</h2>
+                {baseServings && (
+                  <div className="servings-stepper">
+                    <button
+                      type="button"
+                      onClick={() => setServings((s) => Math.max(1, s - 1))}
+                      aria-label="Færre porsjoner"
+                    >
+                      −
+                    </button>
+                    <span>{servings} porsjoner</span>
+                    <button
+                      type="button"
+                      onClick={() => setServings((s) => s + 1)}
+                      aria-label="Flere porsjoner"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <ul className="ingredient-list">
                 {recipe.ingredients.map((ing, i) => (
-                  <li key={i}>{ing}</li>
+                  <li key={i} className="ingredient-scale-row">
+                    <span className="ingredient-scale-name">{ing.name}</span>
+                    {ing.amount != null && (
+                      <span className="ingredient-scale-amounts">
+                        <span className="ingredient-scale-original">
+                          {formatAmount(ing.amount)} {ing.unit}
+                        </span>
+                        {baseServings && ratio !== 1 && (
+                          <>
+                            <span className="ingredient-scale-arrow">→</span>
+                            <span className="ingredient-scale-current">
+                              {formatAmount(ing.amount * ratio)} {ing.unit}
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </section>
