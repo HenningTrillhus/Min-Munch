@@ -801,4 +801,54 @@
   .ingredient-row {
     grid-template-columns: 70px 70px 1fr 40px;
   }
+
+  .recipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .recipe-card-image,
+  .recipe-card-image-placeholder {
+    height: 100px;
+  }
+
+  .recipe-card-image-placeholder {
+    font-size: 28px;
+  }
+
+  .recipe-card-body {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .recipe-card-header {
+    flex-wrap: wrap;
+  }
+
+  .recipe-card-header h3 {
+    font-size: 14px;
+    line-height: 130%;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .recipe-card-meta {
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .recipe-card-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .recipe-card-actions button {
+    font-size: 12px;
+    padding: 6px 10px;
+    min-height: 34px;
+    width: 100%;
+  }
 }
