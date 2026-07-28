@@ -331,7 +331,7 @@
   overscroll-behavior: contain;
   touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
-  z-index: 20;
+  z-index: 35;
 }
 
 .modal-panel {
