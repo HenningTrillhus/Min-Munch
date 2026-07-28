@@ -77,6 +77,10 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete, onSave
             <div className="badge-group">
               {recipe.type && <span className="badge badge-type">{recipe.type}</span>}
               {recipe.category && <span className="badge">{recipe.category}</span>}
+              {recipe.tags?.includes('Vegetar') && (
+                <span className="badge badge-tag">🌱 Vegetar</span>
+              )}
+              {recipe.tags?.includes('Fisk') && <span className="badge badge-tag">🐟 Fisk</span>}
             </div>
           </div>
 

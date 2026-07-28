@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import StarRating from './StarRating'
-import { FOOD_TYPES, INGREDIENT_UNITS } from '../constants'
+import Select from './Select'
+import ComboBox from './ComboBox'
+import { FOOD_TYPES, TAG_OPTIONS, INGREDIENT_UNITS } from '../constants'
 import { uploadRecipeImage, deleteRecipeImage } from '../lib/recipeImages'
+
+const TYPE_OPTIONS = [{ value: '', label: 'Ikke valgt' }, ...FOOD_TYPES.map((t) => ({ value: t, label: t }))]
 
 const emptyForm = {
   title: '',
   category: '',
   type: '',
+  tags: [],
   prep_time_minutes: '',
   servings: '',
   price: '',
@@ -23,6 +28,7 @@ function toFormState(recipe) {
     title: recipe.title ?? '',
     category: recipe.category ?? '',
     type: recipe.type ?? '',
+    tags: recipe.tags ?? [],
     prep_time_minutes: recipe.prep_time_minutes ?? '',
     servings: recipe.servings ?? '',
     price: recipe.price ?? '',
@@ -42,7 +48,7 @@ function toIngredientRows(recipe) {
   }))
 }
 
-export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
+export default function RecipeForm({ recipe, categories, onSave, saving, onSuccess }) {
   const [form, setForm] = useState(() => toFormState(recipe))
   const [ingredientRows, setIngredientRows] = useState(() => toIngredientRows(recipe))
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -53,6 +59,13 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
   function handleChange(e) {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  function toggleTag(tag) {
+    setForm((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag) ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag],
+    }))
   }
 
   // The image currently saved on the recipe is only deleted from storage once the
@@ -117,6 +130,7 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
       title: form.title.trim(),
       category: form.category.trim() || null,
       type: form.type || null,
+      tags: form.tags,
       prep_time_minutes: form.prep_time_minutes ? Number(form.prep_time_minutes) : null,
       servings: form.servings ? Number(form.servings) : null,
       price: form.price ? Number(form.price) : null,
@@ -148,24 +162,22 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
       <div className="form-row">
         <label>
           Kategori
-          <input
-            name="category"
+          <ComboBox
+            options={categories}
             value={form.category}
-            onChange={handleChange}
+            onChange={(v) => setForm((prev) => ({ ...prev, category: v }))}
             placeholder="f.eks. varm rett, sunt"
           />
         </label>
 
         <label>
           Type mat
-          <select name="type" value={form.type} onChange={handleChange}>
-            <option value="">Ikke valgt</option>
-            {FOOD_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          <Select
+            options={TYPE_OPTIONS}
+            value={form.type}
+            onChange={(v) => setForm((prev) => ({ ...prev, type: v }))}
+            placeholder="Ikke valgt"
+          />
         </label>
 
         <label>
@@ -178,6 +190,19 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
             onChange={handleChange}
           />
         </label>
+      </div>
+
+      <div className="tags-field">
+        {TAG_OPTIONS.map((tag) => (
+          <label key={tag} className="tag-checkbox">
+            <input
+              type="checkbox"
+              checked={form.tags.includes(tag)}
+              onChange={() => toggleTag(tag)}
+            />
+            {tag}
+          </label>
+        ))}
       </div>
 
       <div className="form-row">
@@ -254,17 +279,12 @@ export default function RecipeForm({ recipe, onSave, saving, onSuccess }) {
                 value={row.amount}
                 onChange={(e) => updateIngredientRow(i, 'amount', e.target.value)}
               />
-              <select
-                className="ingredient-unit"
+              <Select
+                className="select-compact"
+                options={INGREDIENT_UNITS}
                 value={row.unit}
-                onChange={(e) => updateIngredientRow(i, 'unit', e.target.value)}
-              >
-                {INGREDIENT_UNITS.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => updateIngredientRow(i, 'unit', v)}
+              />
               <input
                 type="text"
                 placeholder="Ingrediens, f.eks. egg"

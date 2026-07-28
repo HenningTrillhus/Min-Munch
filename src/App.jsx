@@ -25,7 +25,12 @@ function App() {
   const [type, setType] = useState('')
   const [category, setCategory] = useState('')
   const [maxTime, setMaxTime] = useState('')
+  const [tags, setTags] = useState([])
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  function toggleTagFilter(tag) {
+    setTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }
 
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem(THEME_KEY)
@@ -52,7 +57,7 @@ function App() {
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
-  }, [search, type, category, maxTime])
+  }, [search, type, category, maxTime, tags])
 
   async function loadRecipes() {
     setLoading(true)
@@ -156,9 +161,11 @@ function App() {
         }
       }
 
+      if (tags.length > 0 && !tags.some((tag) => r.tags?.includes(tag))) return false
+
       return true
     })
-  }, [recipes, search, type, category, maxTime])
+  }, [recipes, search, type, category, maxTime, tags])
 
   const visibleRecipes = filteredRecipes.slice(0, visibleCount)
   const hasMore = visibleCount < filteredRecipes.length
@@ -198,6 +205,8 @@ function App() {
             categories={categories}
             maxTime={maxTime}
             onMaxTimeChange={setMaxTime}
+            tags={tags}
+            onToggleTag={toggleTagFilter}
           />
 
           <section className="recipe-list-section">
@@ -227,6 +236,7 @@ function App() {
         <Modal onClose={() => setFormRecipe(null)}>
           <RecipeForm
             recipe={formRecipe}
+            categories={categories}
             onSave={handleSave}
             saving={saving}
             onSuccess={() => setFormRecipe(null)}

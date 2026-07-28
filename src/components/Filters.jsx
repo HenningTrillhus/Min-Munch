@@ -1,4 +1,5 @@
-import { FOOD_TYPES } from '../constants'
+import Select from './Select'
+import { FOOD_TYPES, TAG_OPTIONS } from '../constants'
 
 const TIME_OPTIONS = [
   { value: '', label: 'Alle tider' },
@@ -7,6 +8,8 @@ const TIME_OPTIONS = [
   { value: '60', label: 'Under 60 min' },
   { value: '60+', label: '60 min eller mer' },
 ]
+
+const TYPE_OPTIONS = [{ value: '', label: 'Alle typer' }, ...FOOD_TYPES.map((t) => ({ value: t, label: t }))]
 
 export default function Filters({
   search,
@@ -18,42 +21,43 @@ export default function Filters({
   categories,
   maxTime,
   onMaxTimeChange,
+  tags,
+  onToggleTag,
 }) {
+  const categoryOptions = [
+    { value: '', label: 'Alle kategorier' },
+    ...categories.map((c) => ({ value: c, label: c })),
+  ]
+
   return (
-    <div className="filters-bar">
-      <input
-        type="search"
-        className="filters-search"
-        placeholder="Søk etter oppskrift..."
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-      />
+    <div className="filters">
+      <div className="filters-bar">
+        <input
+          type="search"
+          className="filters-search"
+          placeholder="Søk etter oppskrift..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
 
-      <select value={type} onChange={(e) => onTypeChange(e.target.value)}>
-        <option value="">Alle typer</option>
-        {FOOD_TYPES.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </select>
+        <Select options={TYPE_OPTIONS} value={type} onChange={onTypeChange} placeholder="Alle typer" />
+        <Select
+          options={categoryOptions}
+          value={category}
+          onChange={onCategoryChange}
+          placeholder="Alle kategorier"
+        />
+        <Select options={TIME_OPTIONS} value={maxTime} onChange={onMaxTimeChange} placeholder="Alle tider" />
+      </div>
 
-      <select value={category} onChange={(e) => onCategoryChange(e.target.value)}>
-        <option value="">Alle kategorier</option>
-        {categories.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
+      <div className="tags-field">
+        {TAG_OPTIONS.map((tag) => (
+          <label key={tag} className="tag-checkbox">
+            <input type="checkbox" checked={tags.includes(tag)} onChange={() => onToggleTag(tag)} />
+            {tag}
+          </label>
         ))}
-      </select>
-
-      <select value={maxTime} onChange={(e) => onMaxTimeChange(e.target.value)}>
-        {TIME_OPTIONS.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      </div>
     </div>
   )
 }
