@@ -1,8 +1,13 @@
 import RecipeCard from './RecipeCard'
 
-export default function RecipeList({ recipes, onOpen, onDelete }) {
+export default function RecipeList({
+  recipes,
+  onOpen,
+  onDelete,
+  emptyMessage = 'Ingen oppskrifter ennå. Legg til den første over!',
+}) {
   if (recipes.length === 0) {
-    return <p className="empty-state">Ingen oppskrifter ennå. Legg til den første over!</p>
+    return <p className="empty-state">{emptyMessage}</p>
   }
 
   return (

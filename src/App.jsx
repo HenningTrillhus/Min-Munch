@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient'
 import RecipeForm from './components/RecipeForm'
 import RecipeList from './components/RecipeList'
-import RecipeDetail from './components/RecipeDetail'
+import RecipeStack from './components/RecipeStack'
+import RecipePicker from './components/RecipePicker'
 import Filters from './components/Filters'
 import Modal from './components/Modal'
 import SettingsButton from './components/SettingsButton'
@@ -19,7 +20,9 @@ function App() {
   const [error, setError] = useState(null)
 
   const [formRecipe, setFormRecipe] = useState(null)
-  const [viewingRecipe, setViewingRecipe] = useState(null)
+  const [openRecipes, setOpenRecipes] = useState([])
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
@@ -59,6 +62,10 @@ function App() {
     setVisibleCount(PAGE_SIZE)
   }, [search, type, category, maxTime, tags])
 
+  useEffect(() => {
+    setActiveIndex((i) => Math.min(i, Math.max(0, openRecipes.length - 1)))
+  }, [openRecipes.length])
+
   async function loadRecipes() {
     setLoading(true)
     setError(null)
@@ -93,6 +100,7 @@ function App() {
         return false
       }
       setRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
+      setOpenRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
       return true
     }
 
@@ -120,6 +128,7 @@ function App() {
       return
     }
     setRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
+    setOpenRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
   }
 
   async function handleDelete(id) {
@@ -128,7 +137,7 @@ function App() {
     const previous = recipes
     const recipeToDelete = previous.find((r) => r.id === id)
     setRecipes((prev) => prev.filter((r) => r.id !== id))
-    setViewingRecipe((prev) => (prev?.id === id ? null : prev))
+    setOpenRecipes((prev) => prev.filter((r) => r.id !== id))
 
     const { error } = await supabase.from('recipes').delete().eq('id', id)
     if (error) {
@@ -139,6 +148,28 @@ function App() {
     if (recipeToDelete?.image_url) {
       deleteRecipeImage(recipeToDelete.image_url)
     }
+  }
+
+  function handleOpenRecipe(recipe) {
+    setOpenRecipes([recipe])
+    setActiveIndex(0)
+  }
+
+  function handleAddToStack(recipe) {
+    setOpenRecipes((prev) => [...prev, recipe])
+    setActiveIndex(openRecipes.length)
+    setPickerOpen(false)
+  }
+
+  function handleCloseStack() {
+    setOpenRecipes([])
+    setActiveIndex(0)
+  }
+
+  function handleEditFromStack(recipe) {
+    setOpenRecipes([])
+    setActiveIndex(0)
+    setFormRecipe(recipe)
   }
 
   const categories = useMemo(
@@ -169,6 +200,7 @@ function App() {
 
   const visibleRecipes = filteredRecipes.slice(0, visibleCount)
   const hasMore = visibleCount < filteredRecipes.length
+  const showMainUI = !formRecipe && openRecipes.length === 0
 
   return (
     <div className="app">
@@ -216,7 +248,7 @@ function App() {
               <>
                 <RecipeList
                   recipes={visibleRecipes}
-                  onOpen={setViewingRecipe}
+                  onOpen={handleOpenRecipe}
                   onDelete={handleDelete}
                 />
                 {hasMore && (
@@ -244,20 +276,31 @@ function App() {
         </Modal>
       )}
 
-      {viewingRecipe && (
-        <RecipeDetail
-          recipe={viewingRecipe}
-          onClose={() => setViewingRecipe(null)}
-          onEdit={(recipe) => {
-            setViewingRecipe(null)
-            setFormRecipe(recipe)
-          }}
+      {openRecipes.length > 0 && (
+        <RecipeStack
+          recipes={openRecipes}
+          activeIndex={activeIndex}
+          onActiveIndexChange={setActiveIndex}
+          onClose={handleCloseStack}
+          onOpenPicker={() => setPickerOpen(true)}
+          onEdit={handleEditFromStack}
           onDelete={handleDelete}
           onSaveMeta={handleSaveMeta}
         />
       )}
 
-      <SettingsButton theme={theme} onToggleTheme={toggleTheme} />
+      {pickerOpen && (
+        <RecipePicker
+          recipes={recipes}
+          categories={categories}
+          openIds={openRecipes.map((r) => r.id)}
+          onSelect={handleAddToStack}
+          onDelete={handleDelete}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+
+      {showMainUI && <SettingsButton theme={theme} onToggleTheme={toggleTheme} />}
     </div>
   )
 }
