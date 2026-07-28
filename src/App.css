@@ -2,8 +2,70 @@
   min-height: 100vh;
 }
 
-.hero {
+/* Settings button */
+
+.settings-widget {
+  position: fixed;
+  left: calc(16px + env(safe-area-inset-left));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
+}
+
+.settings-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
   background: var(--surface);
+  box-shadow: rgba(0, 0, 0, 0.15) 0 4px 12px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-button:hover {
+  border-color: var(--accent);
+}
+
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.settings-popover {
+  position: absolute;
+  bottom: 58px;
+  left: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 8px 24px -4px;
+  padding: 6px;
+  white-space: nowrap;
+}
+
+.settings-popover button {
+  background: transparent;
+  border: none;
+  color: var(--text-h);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  min-height: 44px;
+  border-radius: 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.settings-popover button:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.hero {
+  background: linear-gradient(180deg, var(--accent-bg) 0%, transparent 100%);
   border-bottom: 1px solid var(--border);
   padding: calc(48px + env(safe-area-inset-top)) 20px 40px;
   text-align: center;

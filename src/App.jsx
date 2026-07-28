@@ -5,9 +5,11 @@ import RecipeList from './components/RecipeList'
 import RecipeDetail from './components/RecipeDetail'
 import Filters from './components/Filters'
 import Modal from './components/Modal'
+import SettingsButton from './components/SettingsButton'
 import './App.css'
 
 const PAGE_SIZE = 9
+const THEME_KEY = 'min-munch-theme'
 
 function App() {
   const [recipes, setRecipes] = useState([])
@@ -23,6 +25,21 @@ function App() {
   const [category, setCategory] = useState('')
   const [maxTime, setMaxTime] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem(THEME_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem(THEME_KEY, theme)
+  }, [theme])
+
+  function toggleTheme() {
+    setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+  }
 
   useEffect(() => {
     if (isSupabaseConfigured) {
@@ -101,6 +118,8 @@ function App() {
   }
 
   async function handleDelete(id) {
+    if (!window.confirm('Er du sikker på at du vil slette denne oppskriften?')) return
+
     const previous = recipes
     setRecipes((prev) => prev.filter((r) => r.id !== id))
     setViewingRecipe((prev) => (prev?.id === id ? null : prev))
@@ -222,6 +241,8 @@ function App() {
           onSaveMeta={handleSaveMeta}
         />
       )}
+
+      <SettingsButton theme={theme} onToggleTheme={toggleTheme} />
     </div>
   )
 }
