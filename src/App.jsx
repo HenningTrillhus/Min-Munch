@@ -22,6 +22,7 @@ function App() {
   const [formRecipe, setFormRecipe] = useState(null)
   const [openRecipes, setOpenRecipes] = useState([])
   const [activeIndex, setActiveIndex] = useState(0)
+  const [stackVisible, setStackVisible] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
 
   const [search, setSearch] = useState('')
@@ -150,25 +151,37 @@ function App() {
     }
   }
 
-  function handleOpenRecipe(recipe) {
-    setOpenRecipes([recipe])
-    setActiveIndex(0)
-  }
-
-  function handleAddToStack(recipe) {
-    setOpenRecipes((prev) => [...prev, recipe])
-    setActiveIndex(openRecipes.length)
+  // Used both from the home grid and from the "open another recipe" picker: if the
+  // recipe is already part of the current cooking session, just jump to it instead
+  // of duplicating it, so you never lose progress on the others by re-opening one.
+  function openRecipeInStack(recipe) {
+    setOpenRecipes((prev) => {
+      const existingIndex = prev.findIndex((r) => r.id === recipe.id)
+      if (existingIndex !== -1) {
+        setActiveIndex(existingIndex)
+        return prev
+      }
+      setActiveIndex(prev.length)
+      return [...prev, recipe]
+    })
+    setStackVisible(true)
     setPickerOpen(false)
   }
 
-  function handleCloseStack() {
+  function handleBackToHome() {
+    setStackVisible(false)
+  }
+
+  function handleFinishCooking() {
     setOpenRecipes([])
     setActiveIndex(0)
+    setStackVisible(false)
   }
 
   function handleEditFromStack(recipe) {
     setOpenRecipes([])
     setActiveIndex(0)
+    setStackVisible(false)
     setFormRecipe(recipe)
   }
 
@@ -200,7 +213,7 @@ function App() {
 
   const visibleRecipes = filteredRecipes.slice(0, visibleCount)
   const hasMore = visibleCount < filteredRecipes.length
-  const showMainUI = !formRecipe && openRecipes.length === 0
+  const showMainUI = !formRecipe && !stackVisible
 
   return (
     <div className="app">
@@ -211,6 +224,15 @@ function App() {
           <button type="button" className="hero-cta" onClick={() => setFormRecipe({})}>
             + Ny oppskrift
           </button>
+          {openRecipes.length > 0 && !stackVisible && (
+            <button
+              type="button"
+              className="continue-cooking-button"
+              onClick={() => setStackVisible(true)}
+            >
+              🍳 Fortsett matlaging ({openRecipes.length})
+            </button>
+          )}
         </div>
       </section>
 
@@ -248,7 +270,7 @@ function App() {
               <>
                 <RecipeList
                   recipes={visibleRecipes}
-                  onOpen={handleOpenRecipe}
+                  onOpen={openRecipeInStack}
                   onDelete={handleDelete}
                 />
                 {hasMore && (
@@ -278,10 +300,12 @@ function App() {
 
       {openRecipes.length > 0 && (
         <RecipeStack
+          visible={stackVisible}
           recipes={openRecipes}
           activeIndex={activeIndex}
           onActiveIndexChange={setActiveIndex}
-          onClose={handleCloseStack}
+          onBack={handleBackToHome}
+          onFinish={handleFinishCooking}
           onOpenPicker={() => setPickerOpen(true)}
           onEdit={handleEditFromStack}
           onDelete={handleDelete}
@@ -294,7 +318,7 @@ function App() {
           recipes={recipes}
           categories={categories}
           openIds={openRecipes.map((r) => r.id)}
-          onSelect={handleAddToStack}
+          onSelect={openRecipeInStack}
           onDelete={handleDelete}
           onClose={() => setPickerOpen(false)}
         />

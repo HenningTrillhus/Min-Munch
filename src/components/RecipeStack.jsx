@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import RecipeDetail from './RecipeDetail'
 
 export default function RecipeStack({
+  visible,
   recipes,
   activeIndex,
   onActiveIndexChange,
-  onClose,
+  onBack,
+  onFinish,
   onOpenPicker,
   onEdit,
   onDelete,
@@ -85,9 +87,9 @@ export default function RecipeStack({
   if (!activeRecipe) return null
 
   return (
-    <div className="recipe-stack">
+    <div className={`recipe-stack ${visible ? '' : 'recipe-stack-hidden'}`}>
       <div className="detail-topbar">
-        <button type="button" className="detail-close" onClick={onClose} aria-label="Lukk">
+        <button type="button" className="detail-close" onClick={onBack} aria-label="Tilbake">
           ← Tilbake
         </button>
         <div className="detail-topbar-actions">
@@ -142,9 +144,14 @@ export default function RecipeStack({
             </button>
           </div>
         )}
-        <button type="button" className="open-new-button" onClick={onOpenPicker}>
-          + Åpne ny oppskrift
-        </button>
+        <div className="stack-actions">
+          <button type="button" className="open-new-button" onClick={onOpenPicker}>
+            + Åpne ny oppskrift
+          </button>
+          <button type="button" className="finish-cooking-button" onClick={onFinish}>
+            Fullfør matlaging
+          </button>
+        </div>
       </div>
     </div>
   )
