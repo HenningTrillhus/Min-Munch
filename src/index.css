@@ -8,6 +8,7 @@
   --accent-hover: #266aa3;
   --accent-bg: rgba(47, 128, 196, 0.08);
   --danger: #c0392b;
+  --heart: #e0577a;
   --shadow: rgba(22, 55, 82, 0.06) 0 2px 10px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -33,6 +34,7 @@
     --accent-hover: #6bacdd;
     --accent-bg: rgba(74, 155, 214, 0.14);
     --danger: #e0574a;
+    --heart: #ec6d8e;
     --shadow: rgba(0, 0, 0, 0.4) 0 4px 12px -2px;
   }
 }

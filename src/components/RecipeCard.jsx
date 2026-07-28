@@ -20,7 +20,14 @@ export default function RecipeCard({ recipe, onOpen, onDelete }) {
           </div>
         </div>
 
-        {recipe.difficulty > 0 && <StarRating value={recipe.difficulty} size="sm" />}
+        {(recipe.difficulty > 0 || recipe.love_rating > 0) && (
+          <div className="recipe-card-ratings">
+            {recipe.difficulty > 0 && <StarRating value={recipe.difficulty} size="sm" />}
+            {recipe.love_rating > 0 && (
+              <StarRating icon="heart" value={recipe.love_rating} size="sm" />
+            )}
+          </div>
+        )}
 
         <div className="recipe-card-meta">
           {recipe.prep_time_minutes != null && <span>⏱ {recipe.prep_time_minutes} min</span>}

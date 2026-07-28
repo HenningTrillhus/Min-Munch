@@ -6,10 +6,12 @@ function formatAmount(n) {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
 }
 
-export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
+export default function RecipeDetail({ recipe, onClose, onEdit, onDelete, onSaveMeta }) {
   const [checkedSteps, setCheckedSteps] = useState(() => new Set())
   const baseServings = recipe.servings > 0 ? recipe.servings : null
   const [servings, setServings] = useState(baseServings ?? 1)
+  const [loveRating, setLoveRating] = useState(recipe.love_rating ?? 0)
+  const [notes, setNotes] = useState(recipe.notes ?? '')
 
   const steps = (recipe.instructions || '')
     .split('\n')
@@ -25,16 +27,33 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
     })
   }
 
+  function persistMeta() {
+    const changed = loveRating !== (recipe.love_rating ?? 0) || notes !== (recipe.notes ?? '')
+    if (changed) {
+      onSaveMeta(recipe.id, { love_rating: loveRating || null, notes: notes.trim() || null })
+    }
+  }
+
+  function handleClose() {
+    persistMeta()
+    onClose()
+  }
+
+  function handleEdit() {
+    persistMeta()
+    onEdit(recipe)
+  }
+
   const ratio = baseServings ? servings / baseServings : 1
 
   return (
     <div className="detail-overlay">
       <div className="detail-topbar">
-        <button type="button" className="detail-close" onClick={onClose} aria-label="Lukk">
+        <button type="button" className="detail-close" onClick={handleClose} aria-label="Lukk">
           ← Tilbake
         </button>
         <div className="detail-topbar-actions">
-          <button type="button" onClick={() => onEdit(recipe)}>
+          <button type="button" onClick={handleEdit}>
             Rediger
           </button>
           <button type="button" className="danger" onClick={() => onDelete(recipe.id)}>
@@ -61,7 +80,19 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
             </div>
           </div>
 
-          {recipe.difficulty > 0 && <StarRating value={recipe.difficulty} />}
+          <div className="detail-ratings">
+            {recipe.difficulty > 0 && (
+              <div className="detail-rating-block">
+                <span className="detail-rating-label">Vanskelighetsgrad</span>
+                <StarRating value={recipe.difficulty} />
+              </div>
+            )}
+
+            <div className="detail-rating-block">
+              <span className="detail-rating-label">Din vurdering</span>
+              <StarRating icon="heart" value={loveRating} onChange={setLoveRating} />
+            </div>
+          </div>
 
           <div className="recipe-card-meta">
             {recipe.prep_time_minutes != null && <span>⏱ {recipe.prep_time_minutes} min</span>}
@@ -135,6 +166,17 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete }) {
                 </li>
               ))}
             </ul>
+          </section>
+
+          <section className="notes-field">
+            <h2>Notater</h2>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              placeholder="Skriv et notat om denne oppskriften — f.eks. hva du endret på eller hva som fungerte bra..."
+            />
+            <span className="notes-saved-hint">Lagres automatisk når du går ut av oppskriften</span>
           </section>
         </div>
       </div>

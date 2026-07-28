@@ -85,6 +85,21 @@ function App() {
     return true
   }
 
+  async function handleSaveMeta(id, payload) {
+    const { data, error } = await supabase
+      .from('recipes')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      setError(error.message)
+      return
+    }
+    setRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
+  }
+
   async function handleDelete(id) {
     const previous = recipes
     setRecipes((prev) => prev.filter((r) => r.id !== id))
@@ -204,6 +219,7 @@ function App() {
             setFormRecipe(recipe)
           }}
           onDelete={handleDelete}
+          onSaveMeta={handleSaveMeta}
         />
       )}
     </div>

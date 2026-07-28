@@ -9,6 +9,8 @@ create table if not exists recipes (
   servings int,
   price numeric,
   difficulty smallint check (difficulty between 1 and 5),
+  love_rating smallint check (love_rating between 1 and 5),
+  notes text,
   ingredients jsonb not null default '[]'::jsonb,
   instructions text not null default '',
   image_url text,

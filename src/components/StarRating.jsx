@@ -1,20 +1,24 @@
-const STARS = [1, 2, 3, 4, 5]
+const ITEMS = [1, 2, 3, 4, 5]
 
-export default function StarRating({ value = 0, onChange, size = 'md' }) {
+export default function StarRating({ value = 0, onChange, size = 'md', icon = 'star' }) {
   const interactive = typeof onChange === 'function'
+  const symbol = icon === 'heart' ? '♥' : '★'
 
   return (
-    <div className={`star-rating star-rating-${size}`} role={interactive ? 'radiogroup' : undefined}>
-      {STARS.map((star) => (
+    <div
+      className={`star-rating star-rating-${size} icon-${icon}`}
+      role={interactive ? 'radiogroup' : undefined}
+    >
+      {ITEMS.map((item) => (
         <span
-          key={star}
-          className={`star ${star <= value ? 'filled' : ''} ${interactive ? 'interactive' : ''}`}
-          onClick={interactive ? () => onChange(star === value ? 0 : star) : undefined}
+          key={item}
+          className={`star ${item <= value ? 'filled' : ''} ${interactive ? 'interactive' : ''}`}
+          onClick={interactive ? () => onChange(item === value ? 0 : item) : undefined}
           role={interactive ? 'radio' : undefined}
-          aria-checked={interactive ? star <= value : undefined}
-          aria-label={interactive ? `${star} av 5` : undefined}
+          aria-checked={interactive ? item <= value : undefined}
+          aria-label={interactive ? `${item} av 5` : undefined}
         >
-          ★
+          {symbol}
         </span>
       ))}
     </div>
