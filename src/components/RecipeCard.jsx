@@ -36,7 +36,13 @@ export default function RecipeCard({ recipe, onOpen, onDelete }) {
         </div>
 
         <div className="recipe-card-actions">
-          <button type="button" onClick={() => onOpen(recipe)}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onOpen(recipe)
+            }}
+          >
             Vis oppskrift
           </button>
           <button

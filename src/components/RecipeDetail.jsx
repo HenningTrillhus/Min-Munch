@@ -27,20 +27,20 @@ export default function RecipeDetail({ recipe, onClose, onEdit, onDelete, onSave
     })
   }
 
-  function persistMeta() {
+  async function persistMeta() {
     const changed = loveRating !== (recipe.love_rating ?? 0) || notes !== (recipe.notes ?? '')
     if (changed) {
-      onSaveMeta(recipe.id, { love_rating: loveRating || null, notes: notes.trim() || null })
+      await onSaveMeta(recipe.id, { love_rating: loveRating || null, notes: notes.trim() || null })
     }
   }
 
-  function handleClose() {
-    persistMeta()
+  async function handleClose() {
+    await persistMeta()
     onClose()
   }
 
-  function handleEdit() {
-    persistMeta()
+  async function handleEdit() {
+    await persistMeta()
     onEdit(recipe)
   }
 

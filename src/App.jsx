@@ -87,7 +87,6 @@ function App() {
         return false
       }
       setRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
-      setViewingRecipe((prev) => (prev?.id === data.id ? data : prev))
       return true
     }
 

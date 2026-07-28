@@ -15,6 +15,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  clip-path: circle(50%);
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: rgba(0, 0, 0, 0.15) 0 4px 12px;
@@ -54,7 +55,7 @@
   font-weight: 500;
   padding: 10px 14px;
   min-height: 44px;
-  border-radius: 6px;
+  border-radius: 8px;
   text-align: left;
   width: 100%;
 }
@@ -107,12 +108,18 @@
 
 .hero-cta:hover {
   background: var(--accent-hover);
+  box-shadow: rgba(0, 0, 0, 0.12) 0 6px 16px -4px;
+  transform: translateY(-1px);
+}
+
+.hero-cta:active {
+  transform: translateY(0);
 }
 
 .page-content {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 32px 20px calc(80px + env(safe-area-inset-bottom));
+  padding: 32px 20px calc(96px + env(safe-area-inset-bottom));
 }
 
 .error-banner {
@@ -140,14 +147,7 @@
 
 .filters-bar input,
 .filters-bar select {
-  font: inherit;
-  font-size: 16px;
-  padding: 10px 14px;
   min-height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
   box-shadow: var(--shadow);
 }
 
@@ -227,22 +227,8 @@
 .recipe-form input,
 .recipe-form select,
 .recipe-form textarea {
-  font: inherit;
-  font-size: 16px;
-  padding: 10px;
   min-height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
   background: var(--bg);
-  color: var(--text);
-  resize: vertical;
-}
-
-.recipe-form input:focus,
-.recipe-form select:focus,
-.recipe-form textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
 }
 
 .form-row {
@@ -259,17 +245,22 @@
   border: none;
   padding: 10px 20px;
   min-height: 44px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
 }
 
 .recipe-form button[type='submit']:hover:not(:disabled) {
   background: var(--accent-hover);
+  box-shadow: rgba(0, 0, 0, 0.12) 0 6px 16px -4px;
+  transform: translateY(-1px);
+}
+
+.recipe-form button[type='submit']:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .recipe-form button[type='submit']:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* Ingredient rows (form) */
@@ -298,15 +289,10 @@
   gap: 8px;
 }
 
-.ingredient-row input,
-.ingredient-row select {
-  min-height: 44px;
-}
-
 .ingredient-remove {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--text);
   min-height: 44px;
 }
@@ -318,14 +304,13 @@
 
 .ingredient-remove:disabled {
   opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .ingredient-add {
   align-self: flex-start;
   background: transparent;
   border: 1px dashed var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px 16px;
   min-height: 40px;
   color: var(--accent);
@@ -481,7 +466,7 @@
   font-size: 13px;
   padding: 8px 14px;
   min-height: 40px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-h);
@@ -653,20 +638,7 @@
 }
 
 .notes-field textarea {
-  font: inherit;
-  font-size: 16px;
-  padding: 12px;
   min-height: 90px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  resize: vertical;
-}
-
-.notes-field textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
 }
 
 .notes-saved-hint {
