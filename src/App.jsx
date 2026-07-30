@@ -6,6 +6,7 @@ import RecipeStack from './components/RecipeStack'
 import RecipePicker from './components/RecipePicker'
 import Filters from './components/Filters'
 import Modal from './components/Modal'
+import ConfirmDialog from './components/ConfirmDialog'
 import SettingsButton from './components/SettingsButton'
 import { deleteRecipeImage } from './lib/recipeImages'
 import './App.css'
@@ -20,6 +21,7 @@ function App() {
   const [error, setError] = useState(null)
 
   const [formRecipe, setFormRecipe] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [openRecipes, setOpenRecipes] = useState([])
   const [activeIndex, setActiveIndex] = useState(0)
   const [stackVisible, setStackVisible] = useState(false)
@@ -132,22 +134,33 @@ function App() {
     setOpenRecipes((prev) => prev.map((r) => (r.id === data.id ? data : r)))
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm('Er du sikker på at du vil slette denne oppskriften?')) return
+  function requestDelete(id) {
+    const recipe = recipes.find((r) => r.id === id)
+    if (recipe) setDeleteTarget(recipe)
+  }
+
+  function cancelDelete() {
+    setDeleteTarget(null)
+  }
+
+  async function performDelete() {
+    const target = deleteTarget
+    if (!target) return
+    setDeleteTarget(null)
 
     const previous = recipes
-    const recipeToDelete = previous.find((r) => r.id === id)
-    setRecipes((prev) => prev.filter((r) => r.id !== id))
-    setOpenRecipes((prev) => prev.filter((r) => r.id !== id))
+    setRecipes((prev) => prev.filter((r) => r.id !== target.id))
+    setOpenRecipes((prev) => prev.filter((r) => r.id !== target.id))
+    if (formRecipe?.id === target.id) setFormRecipe(null)
 
-    const { error } = await supabase.from('recipes').delete().eq('id', id)
+    const { error } = await supabase.from('recipes').delete().eq('id', target.id)
     if (error) {
       setError(error.message)
       setRecipes(previous)
       return
     }
-    if (recipeToDelete?.image_url) {
-      deleteRecipeImage(recipeToDelete.image_url)
+    if (target.image_url) {
+      deleteRecipeImage(target.image_url)
     }
   }
 
@@ -268,11 +281,7 @@ function App() {
               <p>Laster oppskrifter...</p>
             ) : (
               <>
-                <RecipeList
-                  recipes={visibleRecipes}
-                  onOpen={openRecipeInStack}
-                  onDelete={handleDelete}
-                />
+                <RecipeList recipes={visibleRecipes} onOpen={openRecipeInStack} />
                 {hasMore && (
                   <div className="show-more">
                     <button type="button" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
@@ -294,6 +303,7 @@ function App() {
             onSave={handleSave}
             saving={saving}
             onSuccess={() => setFormRecipe(null)}
+            onDelete={requestDelete}
           />
         </Modal>
       )}
@@ -308,7 +318,6 @@ function App() {
           onFinish={handleFinishCooking}
           onOpenPicker={() => setPickerOpen(true)}
           onEdit={handleEditFromStack}
-          onDelete={handleDelete}
           onSaveMeta={handleSaveMeta}
         />
       )}
@@ -319,12 +328,25 @@ function App() {
           categories={categories}
           openIds={openRecipes.map((r) => r.id)}
           onSelect={openRecipeInStack}
-          onDelete={handleDelete}
           onClose={() => setPickerOpen(false)}
         />
       )}
 
       {showMainUI && <SettingsButton theme={theme} onToggleTheme={toggleTheme} />}
+
+      {deleteTarget && (
+        <ConfirmDialog
+          title="Slette oppskrift?"
+          message={
+            <>
+              Er du sikker på at du vil slette <strong>{deleteTarget.title}</strong>? Dette kan
+              ikke angres.
+            </>
+          }
+          onConfirm={performDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   )
 }

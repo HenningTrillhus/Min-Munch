@@ -3,7 +3,7 @@ import Modal from './Modal'
 import Filters from './Filters'
 import RecipeList from './RecipeList'
 
-export default function RecipePicker({ recipes, categories, openIds, onSelect, onDelete, onClose }) {
+export default function RecipePicker({ recipes, categories, openIds, onSelect, onClose }) {
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [category, setCategory] = useState('')
@@ -62,7 +62,6 @@ export default function RecipePicker({ recipes, categories, openIds, onSelect, o
         <RecipeList
           recipes={filtered}
           onOpen={onSelect}
-          onDelete={onDelete}
           emptyMessage="Ingen oppskrifter matcher søket."
         />
       </div>

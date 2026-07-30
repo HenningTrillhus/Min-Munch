@@ -72,6 +72,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -97,6 +98,10 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.96);
 }
 
 input:not([type='checkbox']):not([type='radio']),

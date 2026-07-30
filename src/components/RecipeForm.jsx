@@ -48,7 +48,7 @@ function toIngredientRows(recipe) {
   }))
 }
 
-export default function RecipeForm({ recipe, categories, onSave, saving, onSuccess }) {
+export default function RecipeForm({ recipe, categories, onSave, saving, onSuccess, onDelete }) {
   const [form, setForm] = useState(() => toFormState(recipe))
   const [ingredientRows, setIngredientRows] = useState(() => toIngredientRows(recipe))
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -152,7 +152,14 @@ export default function RecipeForm({ recipe, categories, onSave, saving, onSucce
 
   return (
     <form className="recipe-form" onSubmit={handleSubmit}>
-      <h2>{isEditing ? 'Rediger oppskrift' : 'Ny oppskrift'}</h2>
+      <div className="recipe-form-header">
+        <h2>{isEditing ? 'Rediger oppskrift' : 'Ny oppskrift'}</h2>
+        {isEditing && (
+          <button type="button" className="form-delete-button" onClick={() => onDelete(recipe.id)}>
+            🗑️ Slett oppskrift
+          </button>
+        )}
+      </div>
 
       <label>
         Tittel *

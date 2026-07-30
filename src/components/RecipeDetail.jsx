@@ -59,13 +59,15 @@ export default function RecipeDetail({ recipe, isActive, onSaveMeta }) {
 
   return (
     <div className="detail-content">
-      {recipe.image_url ? (
-        <img className="detail-image" src={recipe.image_url} alt={recipe.title} />
-      ) : (
-        <div className="detail-image detail-image-placeholder" aria-hidden="true">
-          🍽
-        </div>
-      )}
+      <div className="detail-image-wrap">
+        {recipe.image_url ? (
+          <img className="detail-image" src={recipe.image_url} alt={recipe.title} />
+        ) : (
+          <div className="detail-image detail-image-placeholder" aria-hidden="true">
+            🍽
+          </div>
+        )}
+      </div>
 
       <div className="detail-body">
         <div className="detail-header">

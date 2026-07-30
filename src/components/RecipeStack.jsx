@@ -10,7 +10,6 @@ export default function RecipeStack({
   onFinish,
   onOpenPicker,
   onEdit,
-  onDelete,
   onSaveMeta,
 }) {
   const viewportRef = useRef(null)
@@ -100,9 +99,6 @@ export default function RecipeStack({
           )}
           <button type="button" onClick={() => onEdit(activeRecipe)}>
             Rediger
-          </button>
-          <button type="button" className="danger" onClick={() => onDelete(activeRecipe.id)}>
-            Slett
           </button>
         </div>
       </div>

@@ -3,7 +3,6 @@ import RecipeCard from './RecipeCard'
 export default function RecipeList({
   recipes,
   onOpen,
-  onDelete,
   emptyMessage = 'Ingen oppskrifter ennå. Legg til den første over!',
 }) {
   if (recipes.length === 0) {
@@ -13,7 +12,7 @@ export default function RecipeList({
   return (
     <div className="recipe-grid">
       {recipes.map((recipe) => (
-        <RecipeCard key={recipe.id} recipe={recipe} onOpen={onOpen} onDelete={onDelete} />
+        <RecipeCard key={recipe.id} recipe={recipe} onOpen={onOpen} />
       ))}
     </div>
   )
