@@ -1,6 +1,7 @@
 export default function ConfirmDialog({
   title,
   message,
+  icon = '🗑️',
   confirmLabel = 'Slett',
   cancelLabel = 'Avbryt',
   onConfirm,
@@ -10,7 +11,7 @@ export default function ConfirmDialog({
     <div className="confirm-overlay" onClick={onCancel}>
       <div className="confirm-panel" onClick={(e) => e.stopPropagation()}>
         <div className="confirm-icon" aria-hidden="true">
-          🗑️
+          {icon}
         </div>
         <h3>{title}</h3>
         <p>{message}</p>

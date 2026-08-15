@@ -2,6 +2,7 @@ import { useState } from 'react'
 import StarRating from './StarRating'
 import Select from './Select'
 import ComboBox from './ComboBox'
+import ConfirmDialog from './ConfirmDialog'
 import { FOOD_TYPES, TAG_OPTIONS, INGREDIENT_UNITS } from '../constants'
 import { uploadRecipeImage, deleteRecipeImage } from '../lib/recipeImages'
 
@@ -48,13 +49,30 @@ function toIngredientRows(recipe) {
   }))
 }
 
-export default function RecipeForm({ recipe, categories, onSave, saving, onSuccess, onDelete }) {
+export default function RecipeForm({
+  recipe,
+  categories,
+  onSave,
+  saving,
+  onSuccess,
+  onDelete,
+  onDiscard,
+}) {
   const [form, setForm] = useState(() => toFormState(recipe))
   const [ingredientRows, setIngredientRows] = useState(() => toIngredientRows(recipe))
   const [uploadingImage, setUploadingImage] = useState(false)
   const [imageError, setImageError] = useState(null)
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const isEditing = Boolean(recipe?.id)
   const originalImageUrl = recipe?.image_url ?? null
+
+  function handleDiscard() {
+    if (form.image_url && form.image_url !== originalImageUrl) {
+      deleteRecipeImage(form.image_url)
+    }
+    setShowDiscardConfirm(false)
+    onDiscard()
+  }
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -329,9 +347,30 @@ export default function RecipeForm({ recipe, categories, onSave, saving, onSucce
         />
       </label>
 
-      <button type="submit" disabled={saving || uploadingImage}>
-        {saving ? 'Lagrer...' : isEditing ? 'Lagre endringer' : 'Lagre oppskrift'}
-      </button>
+      <div className="form-footer">
+        <button
+          type="button"
+          className="form-cancel-button"
+          onClick={() => setShowDiscardConfirm(true)}
+        >
+          Avbryt
+        </button>
+        <button type="submit" disabled={saving || uploadingImage}>
+          {saving ? 'Lagrer...' : isEditing ? 'Lagre endringer' : 'Lagre oppskrift'}
+        </button>
+      </div>
+
+      {showDiscardConfirm && (
+        <ConfirmDialog
+          title="Forkaste oppskrift?"
+          message="Er du sikker på at du vil avbryte? Det du har skrevet inn går tapt og kan ikke gjenopprettes."
+          icon="📝"
+          confirmLabel="Forkast"
+          cancelLabel="Fortsett redigering"
+          onConfirm={handleDiscard}
+          onCancel={() => setShowDiscardConfirm(false)}
+        />
+      )}
     </form>
   )
 }

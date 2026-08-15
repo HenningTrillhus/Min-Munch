@@ -65,6 +65,34 @@
   color: var(--accent);
 }
 
+.active-draft-button {
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top));
+  left: calc(16px + env(safe-area-inset-left));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 16px 8px 12px;
+  min-height: 44px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0 4px 12px;
+  animation: modal-pop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.active-draft-button:hover {
+  background: var(--accent-bg);
+}
+
+.active-draft-icon {
+  font-size: 17px;
+}
+
 .hero {
   background: linear-gradient(180deg, var(--accent-bg) 0%, transparent 100%);
   border-bottom: 1px solid var(--border);
@@ -380,6 +408,10 @@
   }
 }
 
+.modal-overlay-hidden {
+  display: none;
+}
+
 .modal-close {
   position: absolute;
   top: 8px;
@@ -551,8 +583,29 @@
   min-width: 0;
 }
 
+.form-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.form-cancel-button {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text-h);
+  padding: 10px 20px;
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.form-cancel-button:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 .recipe-form button[type='submit'] {
-  align-self: flex-start;
+  flex: 1;
   background: var(--accent);
   color: #fff;
   border: none;

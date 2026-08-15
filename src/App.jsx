@@ -21,6 +21,7 @@ function App() {
   const [error, setError] = useState(null)
 
   const [formRecipe, setFormRecipe] = useState(null)
+  const [formMinimized, setFormMinimized] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [openRecipes, setOpenRecipes] = useState([])
   const [activeIndex, setActiveIndex] = useState(0)
@@ -151,7 +152,10 @@ function App() {
     const previous = recipes
     setRecipes((prev) => prev.filter((r) => r.id !== target.id))
     setOpenRecipes((prev) => prev.filter((r) => r.id !== target.id))
-    if (formRecipe?.id === target.id) setFormRecipe(null)
+    if (formRecipe?.id === target.id) {
+      setFormRecipe(null)
+      setFormMinimized(false)
+    }
 
     const { error } = await supabase.from('recipes').delete().eq('id', target.id)
     if (error) {
@@ -181,6 +185,37 @@ function App() {
     setPickerOpen(false)
   }
 
+  // A draft recipe form only ever occupies one slot, so opening/minimizing/resuming
+  // never discards what's typed in — the underlying RecipeForm stays mounted the
+  // whole time (hidden with CSS, same trick as the recipe-stack), and if you try to
+  // open a *different* form while one is already in progress we just resume the
+  // existing draft instead of silently overwriting it.
+  function handleOpenNewForm() {
+    if (formRecipe) {
+      setFormMinimized(false)
+      return
+    }
+    setFormRecipe({})
+  }
+
+  function handleMinimizeForm() {
+    setFormMinimized(true)
+  }
+
+  function handleResumeForm() {
+    setFormMinimized(false)
+  }
+
+  function handleDiscardForm() {
+    setFormRecipe(null)
+    setFormMinimized(false)
+  }
+
+  function handleFormSuccess() {
+    setFormRecipe(null)
+    setFormMinimized(false)
+  }
+
   function handleBackToHome() {
     setStackVisible(false)
   }
@@ -192,6 +227,10 @@ function App() {
   }
 
   function handleEditFromStack(recipe) {
+    if (formRecipe) {
+      setFormMinimized(false)
+      return
+    }
     setOpenRecipes([])
     setActiveIndex(0)
     setStackVisible(false)
@@ -226,7 +265,7 @@ function App() {
 
   const visibleRecipes = filteredRecipes.slice(0, visibleCount)
   const hasMore = visibleCount < filteredRecipes.length
-  const showMainUI = !formRecipe && !stackVisible
+  const showMainUI = (!formRecipe || formMinimized) && !stackVisible
 
   return (
     <div className="app">
@@ -234,7 +273,7 @@ function App() {
         <div className="hero-content">
           <h1>Min Munch</h1>
           <p>Din digitale oppskriftsbok — samle, søk og lag dine favorittretter.</p>
-          <button type="button" className="hero-cta" onClick={() => setFormRecipe({})}>
+          <button type="button" className="hero-cta" onClick={handleOpenNewForm}>
             + Ny oppskrift
           </button>
           {openRecipes.length > 0 && !stackVisible && (
@@ -296,16 +335,26 @@ function App() {
       </div>
 
       {formRecipe && (
-        <Modal onClose={() => setFormRecipe(null)}>
+        <Modal hidden={formMinimized} onClose={handleMinimizeForm}>
           <RecipeForm
             recipe={formRecipe}
             categories={categories}
             onSave={handleSave}
             saving={saving}
-            onSuccess={() => setFormRecipe(null)}
+            onSuccess={handleFormSuccess}
             onDelete={requestDelete}
+            onDiscard={handleDiscardForm}
           />
         </Modal>
+      )}
+
+      {formRecipe && formMinimized && !stackVisible && (
+        <button type="button" className="active-draft-button" onClick={handleResumeForm}>
+          <span className="active-draft-icon" aria-hidden="true">
+            🍴
+          </span>
+          Aktiv oppskrift
+        </button>
       )}
 
       {openRecipes.length > 0 && (

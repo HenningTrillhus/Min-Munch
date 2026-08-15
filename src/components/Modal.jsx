@@ -1,8 +1,11 @@
-export default function Modal({ onClose, children }) {
+export default function Modal({ hidden, onClose, children }) {
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className={`modal-overlay ${hidden ? 'modal-overlay-hidden' : ''}`}
+      onClick={onClose}
+    >
       <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="modal-close" onClick={onClose} aria-label="Lukk">
+        <button type="button" className="modal-close" onClick={onClose} aria-label="Gå tilbake">
           ✕
         </button>
         {children}
