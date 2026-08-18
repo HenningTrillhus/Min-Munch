@@ -3,7 +3,14 @@ import Modal from './Modal'
 import Filters from './Filters'
 import RecipeList from './RecipeList'
 
-export default function RecipePicker({ recipes, categories, openIds, onSelect, onClose }) {
+export default function RecipePicker({
+  recipes,
+  categories,
+  categoryPopularity,
+  openIds,
+  onSelect,
+  onClose,
+}) {
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [category, setCategory] = useState('')
@@ -23,7 +30,7 @@ export default function RecipePicker({ recipes, categories, openIds, onSelect, o
     return availableRecipes.filter((r) => {
       if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false
       if (type && r.type !== type) return false
-      if (category && r.category !== category) return false
+      if (category && !r.categories?.includes(category)) return false
 
       if (maxTime) {
         if (r.prep_time_minutes == null) return false
@@ -62,6 +69,7 @@ export default function RecipePicker({ recipes, categories, openIds, onSelect, o
         <RecipeList
           recipes={filtered}
           onOpen={onSelect}
+          categoryPopularity={categoryPopularity}
           emptyMessage="Ingen oppskrifter matcher søket."
         />
       </div>

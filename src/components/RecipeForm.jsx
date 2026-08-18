@@ -10,7 +10,7 @@ const TYPE_OPTIONS = [{ value: '', label: 'Ikke valgt' }, ...FOOD_TYPES.map((t) 
 
 const emptyForm = {
   title: '',
-  category: '',
+  categories: [],
   type: '',
   tags: [],
   prep_time_minutes: '',
@@ -27,7 +27,7 @@ function toFormState(recipe) {
   if (!recipe) return emptyForm
   return {
     title: recipe.title ?? '',
-    category: recipe.category ?? '',
+    categories: recipe.categories ?? [],
     type: recipe.type ?? '',
     tags: recipe.tags ?? [],
     prep_time_minutes: recipe.prep_time_minutes ?? '',
@@ -63,8 +63,29 @@ export default function RecipeForm({
   const [uploadingImage, setUploadingImage] = useState(false)
   const [imageError, setImageError] = useState(null)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  const [categoryDraft, setCategoryDraft] = useState('')
   const isEditing = Boolean(recipe?.id)
   const originalImageUrl = recipe?.image_url ?? null
+
+  function addCategory() {
+    const value = categoryDraft.trim()
+    if (!value) return
+    setForm((prev) =>
+      prev.categories.includes(value) ? prev : { ...prev, categories: [...prev.categories, value] }
+    )
+    setCategoryDraft('')
+  }
+
+  function removeCategory(cat) {
+    setForm((prev) => ({ ...prev, categories: prev.categories.filter((c) => c !== cat) }))
+  }
+
+  function handleCategoryKeyDown(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      addCategory()
+    }
+  }
 
   function handleDiscard() {
     if (form.image_url && form.image_url !== originalImageUrl) {
@@ -146,7 +167,7 @@ export default function RecipeForm({
 
     const ok = await onSave({
       title: form.title.trim(),
-      category: form.category.trim() || null,
+      categories: form.categories,
       type: form.type || null,
       tags: form.tags,
       prep_time_minutes: form.prep_time_minutes ? Number(form.prep_time_minutes) : null,
@@ -184,17 +205,7 @@ export default function RecipeForm({
         <input name="title" value={form.title} onChange={handleChange} required />
       </label>
 
-      <div className="form-row">
-        <label>
-          Kategori
-          <ComboBox
-            options={categories}
-            value={form.category}
-            onChange={(v) => setForm((prev) => ({ ...prev, category: v }))}
-            placeholder="f.eks. varm rett, sunt"
-          />
-        </label>
-
+      <div className="form-row form-row-2">
         <label>
           Type mat
           <Select
@@ -215,6 +226,45 @@ export default function RecipeForm({
             onChange={handleChange}
           />
         </label>
+      </div>
+
+      <div className="categories-field">
+        <span className="ingredient-field-label">Kategorier</span>
+
+        {form.categories.length > 0 && (
+          <div className="category-pills">
+            {form.categories.map((cat) => (
+              <span key={cat} className="category-pill">
+                {cat}
+                <button
+                  type="button"
+                  onClick={() => removeCategory(cat)}
+                  aria-label={`Fjern ${cat}`}
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="category-add-row">
+          <ComboBox
+            options={categories.filter((c) => !form.categories.includes(c))}
+            value={categoryDraft}
+            onChange={setCategoryDraft}
+            onKeyDown={handleCategoryKeyDown}
+            placeholder="f.eks. salat, sunt"
+          />
+          <button
+            type="button"
+            className="category-add-button"
+            onClick={addCategory}
+            aria-label="Legg til kategori"
+          >
+            +
+          </button>
+        </div>
       </div>
 
       <div className="tags-field">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function ComboBox({ options, value, onChange, placeholder = '' }) {
+export default function ComboBox({ options, value, onChange, placeholder = '', onKeyDown }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef(null)
 
@@ -34,6 +34,7 @@ export default function ComboBox({ options, value, onChange, placeholder = '' })
           onChange(e.target.value)
           setOpen(true)
         }}
+        onKeyDown={onKeyDown}
       />
 
       {open && filtered.length > 0 && (

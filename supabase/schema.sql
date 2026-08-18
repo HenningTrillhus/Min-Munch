@@ -3,7 +3,7 @@
 create table if not exists recipes (
   id uuid primary key default gen_random_uuid(),
   title text not null,
-  category text,
+  categories text[] not null default '{}',
   type text check (type in ('Frokost', 'Lunsj', 'Middag', 'Dessert', 'Saus', 'Tilbehør', 'Siderett', 'Bakevare', 'Drikke')),
   tags text[] not null default '{}' check (tags <@ array['Vegetar', 'Fisk']::text[]),
   prep_time_minutes int,

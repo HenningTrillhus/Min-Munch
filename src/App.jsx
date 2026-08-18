@@ -12,7 +12,16 @@ import { deleteRecipeImage } from './lib/recipeImages'
 import './App.css'
 
 const PAGE_SIZE = 9
+const MOBILE_PAGE_SIZE = 8
+const MOBILE_BREAKPOINT = '(max-width: 640px)'
 const THEME_KEY = 'min-munch-theme'
+
+// 9 cards looks right in the desktop 3-column grid, but leaves an odd one
+// dangling on the mobile 2-column grid — 8 fills full rows there instead.
+function getPageSize() {
+  if (typeof window === 'undefined') return PAGE_SIZE
+  return window.matchMedia(MOBILE_BREAKPOINT).matches ? MOBILE_PAGE_SIZE : PAGE_SIZE
+}
 
 function App() {
   const [recipes, setRecipes] = useState([])
@@ -33,7 +42,8 @@ function App() {
   const [category, setCategory] = useState('')
   const [maxTime, setMaxTime] = useState('')
   const [tags, setTags] = useState([])
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const [pageSize, setPageSize] = useState(getPageSize)
+  const [visibleCount, setVisibleCount] = useState(getPageSize)
 
   function toggleTagFilter(tag) {
     setTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
@@ -63,8 +73,15 @@ function App() {
   }, [])
 
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE)
-  }, [search, type, category, maxTime, tags])
+    setVisibleCount(pageSize)
+  }, [search, type, category, maxTime, tags, pageSize])
+
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_BREAKPOINT)
+    const handleChange = () => setPageSize(getPageSize())
+    mq.addEventListener('change', handleChange)
+    return () => mq.removeEventListener('change', handleChange)
+  }, [])
 
   useEffect(() => {
     setActiveIndex((i) => Math.min(i, Math.max(0, openRecipes.length - 1)))
@@ -238,15 +255,25 @@ function App() {
   }
 
   const categories = useMemo(
-    () => [...new Set(recipes.map((r) => r.category).filter(Boolean))].sort(),
+    () => [...new Set(recipes.flatMap((r) => r.categories ?? []))].sort(),
     [recipes]
   )
+
+  // How often each category is used across the whole recipe book — used to pick
+  // which categories a card shows first when a recipe has more than fit.
+  const categoryPopularity = useMemo(() => {
+    const counts = new Map()
+    recipes.forEach((r) => {
+      ;(r.categories ?? []).forEach((c) => counts.set(c, (counts.get(c) ?? 0) + 1))
+    })
+    return counts
+  }, [recipes])
 
   const filteredRecipes = useMemo(() => {
     return recipes.filter((r) => {
       if (search && !r.title.toLowerCase().includes(search.toLowerCase())) return false
       if (type && r.type !== type) return false
-      if (category && r.category !== category) return false
+      if (category && !r.categories?.includes(category)) return false
 
       if (maxTime) {
         if (r.prep_time_minutes == null) return false
@@ -320,10 +347,14 @@ function App() {
               <p>Laster oppskrifter...</p>
             ) : (
               <>
-                <RecipeList recipes={visibleRecipes} onOpen={openRecipeInStack} />
+                <RecipeList
+                  recipes={visibleRecipes}
+                  onOpen={openRecipeInStack}
+                  categoryPopularity={categoryPopularity}
+                />
                 {hasMore && (
                   <div className="show-more">
-                    <button type="button" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                    <button type="button" onClick={() => setVisibleCount((c) => c + pageSize)}>
                       Vis mer
                     </button>
                   </div>
@@ -375,6 +406,7 @@ function App() {
         <RecipePicker
           recipes={recipes}
           categories={categories}
+          categoryPopularity={categoryPopularity}
           openIds={openRecipes.map((r) => r.id)}
           onSelect={openRecipeInStack}
           onClose={() => setPickerOpen(false)}

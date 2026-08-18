@@ -74,7 +74,11 @@ export default function RecipeDetail({ recipe, isActive, onSaveMeta }) {
           <h1>{recipe.title}</h1>
           <div className="badge-group">
             {recipe.type && <span className="badge badge-type">{recipe.type}</span>}
-            {recipe.category && <span className="badge">{recipe.category}</span>}
+            {recipe.categories?.map((cat) => (
+              <span key={cat} className="badge">
+                {cat}
+              </span>
+            ))}
             {recipe.tags?.includes('Vegetar') && (
               <span className="badge badge-tag">🌱 Vegetar</span>
             )}

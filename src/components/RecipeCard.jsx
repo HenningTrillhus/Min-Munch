@@ -1,6 +1,12 @@
 import StarRating from './StarRating'
 
-export default function RecipeCard({ recipe, onOpen }) {
+export default function RecipeCard({ recipe, onOpen, categoryPopularity }) {
+  const topCategories = recipe.categories?.length
+    ? [...recipe.categories]
+        .sort((a, b) => (categoryPopularity?.get(b) ?? 0) - (categoryPopularity?.get(a) ?? 0))
+        .slice(0, 3)
+    : []
+
   return (
     <article className="recipe-card" onClick={() => onOpen(recipe)}>
       <div className="recipe-card-image-wrap">
@@ -23,7 +29,11 @@ export default function RecipeCard({ recipe, onOpen }) {
           <h3>{recipe.title}</h3>
           <div className="badge-group">
             {recipe.type && <span className="badge badge-type">{recipe.type}</span>}
-            {recipe.category && <span className="badge">{recipe.category}</span>}
+            {topCategories.map((cat) => (
+              <span key={cat} className="badge">
+                {cat}
+              </span>
+            ))}
             {recipe.tags?.includes('Vegetar') && (
               <span className="badge badge-tag">🌱 Vegetar</span>
             )}
